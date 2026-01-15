@@ -115,6 +115,14 @@ impl ConnectionOptionsBuilder {
         self
     }
 
+    pub fn path<T>(mut self, path: T) -> Self
+    where
+        T: Into<String>,
+    {
+        self.0.path = path.into();
+        self
+    }
+
     pub fn pool_size(mut self, pool_size: u32) -> Self {
         self.0.pool_size = pool_size;
         self
@@ -179,6 +187,7 @@ impl ConnectionOptionsBuilder {
 pub struct ConnectionOptions {
     pub(crate) host: String,
     pub(crate) port: u16,
+    pub(crate) path: String,
     pub(crate) pool_size: u32,
     pub(crate) pool_healthcheck_interval: Option<Duration>,
     pub(crate) pool_get_connection_timeout: Option<Duration>,
@@ -263,6 +272,7 @@ impl Default for ConnectionOptions {
         ConnectionOptions {
             host: String::from("localhost"),
             port: 8182,
+            path: String::from("/gremlin"),
             pool_size: 10,
             pool_get_connection_timeout: Some(Duration::from_secs(30)),
             pool_healthcheck_interval: None,
@@ -283,7 +293,7 @@ impl ConnectionOptions {
 
     pub fn websocket_url(&self) -> String {
         let protocol = if self.ssl { "wss" } else { "ws" };
-        format!("{}://{}:{}/gremlin", protocol, self.host, self.port)
+        format!("{}://{}:{}{}", protocol, self.host, self.port, self.path)
     }
 }
 
@@ -357,5 +367,17 @@ mod tests {
         };
 
         assert_eq!(options.websocket_url(), "wss://localhost:8182/gremlin");
+    }
+
+    #[test]
+    fn connection_option_custom_path() {
+        let options = ConnectionOptions::builder()
+            .host("cosmos.example.com")
+            .port(443)
+            .ssl(true)
+            .path("/")
+            .build();
+
+        assert_eq!(options.websocket_url(), "wss://cosmos.example.com:443/");
     }
 }
