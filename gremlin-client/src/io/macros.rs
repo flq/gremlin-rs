@@ -24,6 +24,21 @@ macro_rules! g_serializer {
 macro_rules! g_serializer_2 {
     ($name:ident, { $($key:expr => $value:ident),*}) => {
         pub fn $name(val: &Value) -> GremlinResult<GValue> {
+            // Handle plain JSON types (CosmosDB returns these without GraphSON wrappers)
+            if let Value::Null = val {
+                return Ok(GValue::Null)
+            }
+            if let Value::Bool(b) = val {
+                return Ok(GValue::Bool(*b))
+            }
+            if let Value::Number(n) = val {
+                if let Some(i) = n.as_i64() {
+                    return Ok(GValue::Int64(i))
+                }
+                if let Some(f) = n.as_f64() {
+                    return Ok(GValue::Double(f))
+                }
+            }
             if let Value::String(ref s) = val {
                 return Ok(s.clone().into())
             }
