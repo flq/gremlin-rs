@@ -24,7 +24,6 @@ use futures::{
 use futures::channel::mpsc::{channel, Receiver, Sender};
 use std::collections::HashMap;
 use std::sync::Arc;
-use url;
 use uuid::Uuid;
 
 type WSStream =
@@ -66,12 +65,12 @@ impl Conn {
         T: Into<ConnectionOptions>,
     {
         let opts = options.into();
-        let url = url::Url::parse(&opts.websocket_url()).expect("failed to parse url");
+        let url = opts.websocket_url();
 
         let websocket_config = opts.websocket_options.as_ref().map(WebSocketConfig::from);
 
         let (client, _) = connect_async_with_tls_connector_and_config(
-            url,
+            url.as_str(),
             tls::connector(&opts),
             websocket_config,
         )
@@ -153,7 +152,7 @@ fn sender_loop(
                     Cmd::Msg(msg) => {
                         let mut guard = requests.lock().await;
                         guard.insert(msg.1, msg.0);
-                        if let Err(e) = sink.send(Message::Binary(msg.2)).await {
+                        if let Err(e) = sink.send(Message::Binary(msg.2.into())).await {
                             let mut sender = guard.remove(&msg.1).unwrap();
                             sender
                                 .send(Err(GremlinError::from(Arc::new(e))))
@@ -163,7 +162,7 @@ fn sender_loop(
                         drop(guard);
                     }
                     Cmd::Pong(data) => {
-                        sink.send(Message::Pong(data))
+                        sink.send(Message::Pong(data.into()))
                             .await
                             .expect("Failed to send pong message.");
                     }
@@ -225,7 +224,7 @@ fn receiver_loop(
                         }
                     }
                     Message::Ping(data) => {
-                        let _ = sender.send(Cmd::Pong(data)).await;
+                        let _ = sender.send(Cmd::Pong(data.to_vec())).await;
                     }
                     _ => {}
                 },

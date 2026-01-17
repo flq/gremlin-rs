@@ -25,7 +25,7 @@ mod aio {
                 .execute("g.V().hasLabel('NotFound')", &[])
                 .await
                 .expect("It should execute a traversal")
-                .count()
+                .fold(0usize, |acc, _| acc + 1)
                 .await
         )
     }

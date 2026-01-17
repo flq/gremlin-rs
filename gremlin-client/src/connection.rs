@@ -62,13 +62,13 @@ impl ConnectionStream {
 
     fn send(&mut self, payload: Vec<u8>) -> GremlinResult<()> {
         self.0
-            .send(Message::Binary(payload))
+            .send(Message::Binary(payload.into()))
             .map_err(GremlinError::from)
     }
 
     fn recv(&mut self) -> GremlinResult<Vec<u8>> {
         match self.0.read()? {
-            Message::Binary(binary) => Ok(binary),
+            Message::Binary(binary) => Ok(binary.to_vec()),
             _ => unimplemented!(),
         }
     }
