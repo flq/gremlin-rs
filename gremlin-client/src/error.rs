@@ -1,3 +1,4 @@
+#[cfg(feature = "async_gremlin")]
 use std::sync::Arc;
 
 use crate::structure::GValue;

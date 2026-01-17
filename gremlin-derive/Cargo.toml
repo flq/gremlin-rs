@@ -2,7 +2,7 @@
 name = "gremlin-derive"
 version = "0.1.0"
 authors = ["Enrico Risa <enrico.risa@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 description= "Proc macro for gremlin-rs™"
 repository = "https://github.com/wolf4ood/gremlin-rs"

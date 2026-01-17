@@ -13,21 +13,16 @@ use futures::TryFutureExt;
 use async_tungstenite::tokio::{connect_async_with_tls_connector_and_config, TokioAdapter};
 
 use async_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
-use async_tungstenite::WebSocketStream;
-use async_tungstenite::{self, stream};
-use futures::{
-    lock::Mutex,
-    stream::{SplitSink, SplitStream},
-    SinkExt, StreamExt,
-};
+use async_tungstenite::{stream, WebSocketReceiver, WebSocketSender};
+use futures::{lock::Mutex, SinkExt, StreamExt};
 
 use futures::channel::mpsc::{channel, Receiver, Sender};
 use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
 
-type WSStream =
-    WebSocketStream<stream::Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
+type WSSender = WebSocketSender<stream::Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
+type WSReceiver = WebSocketReceiver<stream::Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -141,7 +136,7 @@ fn send_shutdown(conn: &mut Conn) {
 }
 
 fn sender_loop(
-    mut sink: SplitSink<WSStream, Message>,
+    mut sink: WSSender,
     requests: Arc<Mutex<HashMap<Uuid, Sender<GremlinResult<Response>>>>>,
     mut receiver: Receiver<Cmd>,
 ) {
@@ -176,12 +171,12 @@ fn sender_loop(
                 }
             }
         }
-        let _ = sink.close().await;
+        let _ = sink.close(None).await;
     });
 }
 
 fn receiver_loop(
-    mut stream: SplitStream<WSStream>,
+    mut stream: WSReceiver,
     requests: Arc<Mutex<HashMap<Uuid, Sender<GremlinResult<Response>>>>>,
     mut sender: Sender<Cmd>,
 ) {

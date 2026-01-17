@@ -14,12 +14,11 @@ Install from [crates.io](https://crates.io/)
 gremlin-client = "0.8"
 ```
 
-
-with async support via [async-std](https://async.rs/)
+with [tokio](https://tokio.rs/) async support
 
 ```toml
 [dependencies]
-gremlin-client = { version = "0.8", features = ["async_std"] }
+gremlin-client = { version = "0.8", features = ["tokio-runtime"] }
 ```
 
 ### Examples
@@ -53,31 +52,6 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
 **Asynchronous**
 
-With [async-std](https://async.rs/)
-
-activate the feature `async-std-runtime`
-
-`gremlin-client = { version = "*", features = ["async-std-runtime"] }`
-
-```rust
-     
-use gremlin_client::{aio::GremlinClient, Vertex};
-use async_std::prelude::*;
-
-#[async_std::main]
-async fn main() -> Result<(), Box<std::error::Error>> {
-
-    let client = GremlinClient::connect("localhost").await?;
-    let results = client.execute("g.V(param)", &[("param", &1)]).await?
-        .filter_map(Result::ok)
-        .map(|f| f.take::<Vertex>())
-        .collect::<Result<Vec<Vertex>, _>>().await?;
-    println!("{:?}", results);
-    Ok(())
-    
-}
-```
-
 With [tokio](https://tokio.rs/)
 
 activate the feature `tokio-runtime`
@@ -85,7 +59,7 @@ activate the feature `tokio-runtime`
 `gremlin-client = { version = "*", features = ["tokio-runtime"] }`
 
 ```rust
-     
+
 use gremlin_client::{aio::GremlinClient, Vertex};
 use tokio_stream::StreamExt;
 
@@ -99,7 +73,7 @@ async fn main() -> Result<(), Box<std::error::Error>> {
         .collect::<Result<Vec<Vertex>, _>>().await?;
     println!("{:?}", results);
     Ok(())
-    
+
 }
 ```
 
@@ -118,37 +92,15 @@ using Rust language.
 
     let g = traversal().with_remote(client);
 
-    let results = g.v(()).has_label("person").has(("name","Jon")).to_list()?;   
-    
+    let results = g.v(()).has_label("person").has(("name","Jon")).to_list()?;
+
     println!("{:?}", results);
     Ok(())
 }
 ```
 
 
-**Aynchronous**
-
-With [async-std](https://async.rs/)
-
-```rust
-use gremlin_client::{aio::GremlinClient, Vertex, process::traversal::traversal};
-use async_std::prelude::*;
-
-#[async_std::main]
-async fn main() -> Result<(), Box<std::error::Error>> {
-
-    
-    let client = GremlinClient::connect("localhost").await?;
-
-    let g = traversal().with_remote_async(client);
-
-    let results = g.v(()).has_label("person").has(("name","Jon")).to_list().await?;   
-
-    println!("{:?}", results);
-    Ok(())
-    
-}
-```
+**Asynchronous**
 
 With [tokio](https://tokio.rs/)
 
@@ -163,7 +115,7 @@ async fn main() -> Result<(), Box<std::error::Error>> {
 
     let g = traversal().with_remote_async(client);
 
-    let results = g.v(()).has_label("person").has(("name","Jon")).to_list().await?;   
+    let results = g.v(()).has_label("person").has(("name","Jon")).to_list().await?;
 
     println!("{:?}", results);
     Ok(())
@@ -182,7 +134,7 @@ By including the `derive` feature in your Cargo.toml
 gremlin_client = { version = "*", features = ["derive"] }
 ```
 
-two derive macros are available 
+two derive macros are available
 
 - FromGMap
 - FromGValue
@@ -212,7 +164,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|f| Person::try_from(f))
         .collect::<Result<Vec<Person>, _>>()?;
 
-    println!("Person {:?}", results[0);
+    println!("Person {:?}", results[0]);
     Ok(())
 }
 
@@ -244,10 +196,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(Person::try_from)
         .collect::<Result<Vec<Person>, _>>()?;
 
-    println!("Person {:?}", results[0);
+    println!("Person {:?}", results[0]);
 
     Ok(())
 }
 ```
-
-

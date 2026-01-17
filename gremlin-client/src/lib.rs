@@ -9,10 +9,10 @@
 //! gremlin-client = "*"
 //! ```
 //!
-//! For async support via [async-std](https://async.rs/)
+//! For async support via [tokio](https://tokio.rs/)
 //! ```toml
 //! [dependencies]
-//! gremlin-client =  { version = "*", features = ["async_std"] }
+//! gremlin-client = { version = "*", features = ["tokio-runtime"] }
 //! ```
 //!
 //!
@@ -21,7 +21,7 @@
 //! **Synchronous**
 //!
 //! ```rust,no_run
-//!     
+//!
 //! use gremlin_client::{GremlinClient, Vertex};
 //!
 //! fn main() -> Result<(), Box<std::error::Error>> {
@@ -44,14 +44,12 @@
 //! **Asynchronous**
 //!
 //! ```rust,no_run,ignore
-//!     
+//!
 //! use gremlin_client::{aio::GremlinClient, Vertex};
-//! use async_std::task;
-//! use async_std::prelude::*;
+//! use tokio_stream::StreamExt;
 //!
-//! fn main() -> Result<(), Box<std::error::Error>> {
-//!
-//!    task::block_on(async {
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<std::error::Error>> {
 //!     let client = GremlinClient::connect("localhost").await?;
 //!     let results = client
 //!            .execute("g.V(param)", &[("param", &1)]).await?
@@ -60,9 +58,7 @@
 //!         .collect::<Result<Vec<Vertex>, _>>().await?;
 //!         println!("{:?}", results);
 //!         Ok(())
-//!    })    
-//!
-//!}
+//! }
 //!
 //!
 //! ```
@@ -72,7 +68,7 @@
 //! **Synchronous**
 //!
 //! ```rust,no_run
-//!     
+//!
 //! use gremlin_client::{GremlinClient, Vertex, process::traversal::traversal};
 //!
 //! fn main() -> Result<(), Box<std::error::Error>> {
@@ -80,35 +76,32 @@
 //!
 //!    let g = traversal().with_remote(client);
 //!
-//!    let results = g.v(()).has_label("person").has(("name","Jon")).to_list()?;   
-//!    
+//!    let results = g.v(()).has_label("person").has(("name","Jon")).to_list()?;
+//!
 //!    println!("{:?}", results);
 //!    Ok(())
 //!}
 //!
 //! ```
-//! **Aynchronous**
+//! **Asynchronous**
 //!
 //! ```rust,no_run,ignore
-//!     
+//!
 //! use gremlin_client::{aio::GremlinClient, Vertex, process::traversal::traversal};
-//! use async_std::task;
-//! use async_std::prelude::*;
+//! use tokio_stream::StreamExt;
 //!
-//! fn main() -> Result<(), Box<std::error::Error>> {
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<std::error::Error>> {
 //!
-//!     task::block_on(async {
+//!     let client = GremlinClient::connect("localhost").await?;
 //!
-//!         let client = GremlinClient::connect("localhost").await?;
+//!     let g = traversal().with_remote_async(client);
 //!
-//!         let g = traversal().with_remote_async(client);
+//!     let results = g.v(()).has_label("person").has(("name","Jon")).to_list().await?;
 //!
-//!         let results = g.v(()).has_label("person").has(("name","Jon")).to_list().await?;   
-//!    
-//!         println!("{:?}", results);
-//!         Ok(())
-//!    })
-//!}
+//!     println!("{:?}", results);
+//!     Ok(())
+//! }
 //!
 #[macro_use]
 extern crate lazy_static;

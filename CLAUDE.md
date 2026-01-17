@@ -15,7 +15,6 @@ gremlin-rs/
 │   └── tests/          # Integration tests
 │       └── common/     # Shared test utilities (mod.rs)
 ├── gremlin-derive/     # Derive macros
-├── gremlin-cli/        # CLI tool
 └── gremlin-tutorial/   # Examples
 ```
 
@@ -75,29 +74,28 @@ These tests need the TinkerPop modern toy graph loaded (`TinkerFactory.createMod
 
 ## Feature Flags
 
-```toml
+```
 async_gremlin          # Enable async support
 tokio-runtime          # Use Tokio runtime
-async-std-runtime      # Use async-std runtime
 derive                 # Enable derive macros
 ```
 
 ## Common Patterns
 
 ### Sync Client
-```rust
+```
 let client = GremlinClient::connect(("localhost", 8182))?;
 let results = client.execute("g.V().limit(1)", &[])?;
 ```
 
 ### Async Client
-```rust
+```
 let client = GremlinClient::connect(("localhost", 8182)).await?;
 let results = client.execute("g.V().limit(1)", &[]).await?;
 ```
 
 ### Traversal API
-```rust
+```
 let g = traversal().with_remote(client);
 let vertices = g.v(()).has_label("person").to_list()?;
 ```
