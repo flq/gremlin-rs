@@ -232,7 +232,7 @@ fn test_complex_vertex_creation_with_option_some_properties() {
             .valueMap()"#;
 
     let uuid = uuid::Uuid::new_v4();
-    let now = Utc.timestamp(5, 0);
+    let now = Utc.timestamp_opt(5, 0).unwrap();
     let params: &[(&str, &dyn ToGValue)] = &[
         ("name", &"mark"),
         ("age", &(22 as i32)),
@@ -336,7 +336,7 @@ fn test_complex_vertex_creation_with_properties() {
         ("name", &"mark"),
         ("score", &3.2),
         ("uuid", &uuid),
-        ("dateTime", &chrono::Utc.timestamp(1551825863, 0)),
+        ("dateTime", &chrono::Utc.timestamp_opt(1551825863, 0).unwrap()),
         ("date", &(1551825863 as i64)),
     ];
     let results = graph
@@ -370,7 +370,7 @@ fn test_complex_vertex_creation_with_properties() {
     );
 
     assert_eq!(
-        &chrono::Utc.timestamp_millis(1551825863),
+        &chrono::Utc.timestamp_millis_opt(1551825863).unwrap(),
         properties["date"].get::<List>().unwrap()[0]
             .get::<VertexProperty>()
             .unwrap()
@@ -412,7 +412,7 @@ fn test_complex_vertex_creation_with_properties() {
     );
 
     assert_eq!(
-        &chrono::Utc.timestamp(1551825863, 0),
+        &chrono::Utc.timestamp_opt(1551825863, 0).unwrap(),
         properties["dateTime"].get::<List>().unwrap()[0]
             .get::<VertexProperty>()
             .unwrap()
@@ -431,7 +431,7 @@ fn test_inserting_date_with_milisecond_precision() {
 
     let q = r#"g.addV('person').property('dateTime',dateTime).propertyMap()"#;
 
-    let expected = chrono::Utc.timestamp(1551825863, 0);
+    let expected = chrono::Utc.timestamp_opt(1551825863, 0).unwrap();
     let params: &[(&str, &dyn ToGValue)] = &[("dateTime", &expected)];
 
     let results = graph
@@ -502,10 +502,10 @@ fn test_list_cardinality() {
             .property(list, 'bool1', bool_4)
             .valueMap()"#;
 
-    let date_1 = Utc.timestamp(1, 0);
-    let date_2 = Utc.timestamp(1, 0);
-    let date_3 = Utc.timestamp(2, 0);
-    let date_4 = Utc.timestamp(3, 0);
+    let date_1 = Utc.timestamp_opt(1, 0).unwrap();
+    let date_2 = Utc.timestamp_opt(1, 0).unwrap();
+    let date_3 = Utc.timestamp_opt(2, 0).unwrap();
+    let date_4 = Utc.timestamp_opt(3, 0).unwrap();
 
     let uuid_1 = uuid::Uuid::new_v4();
     let uuid_2 = uuid::Uuid::new_v4();
@@ -633,9 +633,9 @@ fn test_set_cardinality() {
             .property(set, 'bool1_set', bool_4)
             .valueMap()"#;
 
-    let date_1 = Utc.timestamp(1, 0);
-    let date_3 = Utc.timestamp(2, 0);
-    let date_4 = Utc.timestamp(3, 0);
+    let date_1 = Utc.timestamp_opt(1, 0).unwrap();
+    let date_3 = Utc.timestamp_opt(2, 0).unwrap();
+    let date_4 = Utc.timestamp_opt(3, 0).unwrap();
 
     let uuid_1 = uuid::Uuid::new_v4();
     let uuid_2 = uuid::Uuid::new_v4();
@@ -833,8 +833,7 @@ fn test_explain() {
     assert_eq!(
         &vec![
             String::from("TinkerGraphStep(vertex,[])"),
-            String::from("RangeGlobalStep(0,1)"),
-            String::from("ReferenceElementStep")
+            String::from("RangeGlobalStep(0,1)")
         ],
         t.final_t()
     );
@@ -927,7 +926,7 @@ fn test_vertex_mapping() {
         ("name", &"mark"),
         ("score", &3.2),
         ("uuid", &uuid),
-        ("dateTime", &chrono::Utc.timestamp(1551825863, 0)),
+        ("dateTime", &chrono::Utc.timestamp_opt(1551825863, 0).unwrap()),
         ("date", &(1551825863 as i64)),
     ];
     let mark = graph

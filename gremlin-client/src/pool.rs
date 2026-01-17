@@ -7,7 +7,7 @@ use crate::message::{
     message_with_args, message_with_args_and_uuid, message_with_args_v2, Response,
 };
 use crate::{GValue, GraphSON, GremlinResult};
-use base64::encode;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -72,7 +72,7 @@ impl ManageConnection for GremlinConnectionManager {
 
                     args.insert(
                         String::from("sasl"),
-                        GValue::String(encode(&format!("\0{}\0{}", c.username, c.password))),
+                        GValue::String(STANDARD.encode(format!("\0{}\0{}", c.username, c.password))),
                     );
 
                     let args = self.options.serializer.write(&GValue::from(args))?;

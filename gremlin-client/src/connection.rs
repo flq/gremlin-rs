@@ -1,4 +1,4 @@
-use std::{net::TcpStream, sync::Arc, time::Duration};
+use std::{net::TcpStream, time::Duration};
 
 use crate::{GraphSON, GremlinError, GremlinResult};
 use native_tls::TlsConnector;
@@ -62,12 +62,12 @@ impl ConnectionStream {
 
     fn send(&mut self, payload: Vec<u8>) -> GremlinResult<()> {
         self.0
-            .write_message(Message::Binary(payload))
+            .send(Message::Binary(payload))
             .map_err(GremlinError::from)
     }
 
     fn recv(&mut self) -> GremlinResult<Vec<u8>> {
-        match self.0.read_message()? {
+        match self.0.read()? {
             Message::Binary(binary) => Ok(binary),
             _ => unimplemented!(),
         }

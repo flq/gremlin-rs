@@ -35,7 +35,7 @@ impl Vertex {
         &self.label
     }
 
-    pub fn iter(&self) -> Iter<String, Vec<VertexProperty>> {
+    pub fn iter(&self) -> Iter<'_, String, Vec<VertexProperty>> {
         self.properties.iter()
     }
 

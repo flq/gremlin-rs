@@ -49,7 +49,7 @@ impl Edge {
         &self.out_v
     }
 
-    pub fn iter(&self) -> Iter<String, Property> {
+    pub fn iter(&self) -> Iter<'_, String, Property> {
         self.properties.iter()
     }
 

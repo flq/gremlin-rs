@@ -1,4 +1,4 @@
-use crate::{GremlinError, GremlinResult, WebSocketOptions};
+use crate::{GremlinError, GremlinResult};
 
 use crate::connection::ConnectionOptions;
 
@@ -90,7 +90,7 @@ mod tls {
             _scts: &mut dyn Iterator<Item = &[u8]>,
             _ocsp_response: &[u8],
             _now: SystemTime,
-        ) -> Result<rustls::client::ServerCertVerified, rustls::TLSError> {
+        ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
             Ok(rustls::client::ServerCertVerified::assertion())
         }
     }

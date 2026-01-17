@@ -42,7 +42,7 @@ where
     T: Fn(&Value) -> GremlinResult<GValue>,
 {
     let val = expect_i64!(val);
-    Ok(GValue::from(Utc.timestamp_millis(val)))
+    Ok(GValue::from(Utc.timestamp_millis_opt(val).unwrap()))
 }
 
 // Long deserializer [docs](http://tinkerpop.apache.org/docs/current/dev/io/#_long_2)
@@ -550,7 +550,7 @@ mod tests {
         let result = deserializer_v3(&value).expect("Failed to deserialize Date");
         assert_eq!(
             result,
-            GValue::Date(chrono::Utc.timestamp_millis(1551825863))
+            GValue::Date(chrono::Utc.timestamp_millis_opt(1551825863).unwrap())
         );
 
         // UUID

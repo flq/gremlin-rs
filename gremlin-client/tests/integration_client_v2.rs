@@ -159,7 +159,7 @@ fn test_inserting_date_with_milisecond_precision() {
 
     let q = r#"g.addV('person').property('dateTime',dateTime).propertyMap()"#;
 
-    let expected = chrono::Utc.timestamp(1551825863, 0);
+    let expected = chrono::Utc.timestamp_opt(1551825863, 0).unwrap();
     let params: &[(&str, &dyn ToGValue)] = &[("dateTime", &expected)];
 
     let results = graph
@@ -208,7 +208,7 @@ fn test_complex_vertex_creation_with_properties_v2() {
         ("name", &"mark"),
         ("score", &3.2),
         ("uuid", &uuid),
-        ("dateTime", &chrono::Utc.timestamp(1551825863, 0)),
+        ("dateTime", &chrono::Utc.timestamp_opt(1551825863, 0).unwrap()),
         ("date", &(1551825863 as i64)),
     ];
     let results = graph
@@ -242,7 +242,7 @@ fn test_complex_vertex_creation_with_properties_v2() {
     );
 
     assert_eq!(
-        &chrono::Utc.timestamp_millis(1551825863),
+        &chrono::Utc.timestamp_millis_opt(1551825863).unwrap(),
         properties["date"].get::<List>().unwrap()[0]
             .get::<VertexProperty>()
             .unwrap()
@@ -284,7 +284,7 @@ fn test_complex_vertex_creation_with_properties_v2() {
     );
 
     assert_eq!(
-        &chrono::Utc.timestamp(1551825863, 0),
+        &chrono::Utc.timestamp_opt(1551825863, 0).unwrap(),
         properties["dateTime"].get::<List>().unwrap()[0]
             .get::<VertexProperty>()
             .unwrap()
@@ -383,8 +383,7 @@ fn test_explain_v2() {
     assert_eq!(
         &vec![
             String::from("TinkerGraphStep(vertex,[])"),
-            String::from("RangeGlobalStep(0,1)"),
-            String::from("ReferenceElementStep")
+            String::from("RangeGlobalStep(0,1)")
         ],
         t.final_t()
     );

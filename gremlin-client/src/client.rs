@@ -7,7 +7,7 @@ use crate::process::traversal::Bytecode;
 use crate::ToGValue;
 use crate::{ConnectionOptions, GremlinError, GremlinResult};
 use crate::{GResultSet, GValue};
-use base64::encode;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use r2d2::Pool;
 use serde::Serialize;
 use std::collections::{HashMap, VecDeque};
@@ -238,7 +238,7 @@ impl GremlinClient {
 
                     args.insert(
                         String::from("sasl"),
-                        GValue::String(encode(&format!("\0{}\0{}", c.username, c.password))),
+                        GValue::String(STANDARD.encode(format!("\0{}\0{}", c.username, c.password))),
                     );
 
                     let args = self.options.serializer.write(&GValue::from(args))?;
