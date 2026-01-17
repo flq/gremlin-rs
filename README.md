@@ -1,9 +1,18 @@
+## A word of warning
+
+This branch contains numerous changes which are exclusively geared towards making the library useful for
+the gremlin UI [Peltzer](https://github.com/flq/peltzer).
+
+* Removal of async-std support
+* Update of dependencies
+* Added connectionconfig extension to be able to replace the hardcode path
+* Some adaptations to Graphson V2 deserialization to be able to read the Cosmos DB responses.
+
 ## gremlin-client
 
 A Rust client for Apache TinkerPop™.
 
 ### Installation
-
 
 Install from [crates.io](https://crates.io/)
 
@@ -16,14 +25,12 @@ with [tokio](https://tokio.rs/) async support
 
 ```toml
 [dependencies]
-gremlin-client = { version = "0.8", features = ["tokio-runtime"] }
+gremlin-client = { git = "https://github.com/flq/gremlin-rs", branch = "peltzer-support", features = ["tokio-runtime"] }
 ```
 
 ### Examples
 
-
 #### Basic usage
-
 
 Execute a simple Gremlin query with an id and collect the results
 
