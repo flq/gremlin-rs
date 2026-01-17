@@ -7,16 +7,11 @@ mod aio {
 
     use super::common::aio::{connect_serializer, create_vertex_with_label, drop_vertices};
 
-    #[cfg(feature = "async-std-runtime")]
-    use async_std::prelude::*;
-
-    #[cfg(feature = "tokio-runtime")]
     use tokio_stream::StreamExt;
 
     use gremlin_client::{GraphSON, Vertex};
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_simple_vertex_traversal_with_multiple_id_v2() {
         let client = connect_serializer(GraphSON::V2).await;
         drop_vertices(&client, "test_simple_vertex_traversal_async")

@@ -8,20 +8,14 @@ mod aio {
     use gremlin_client::{Edge, GValue, Map, Vertex};
 
     use super::common::aio::{connect, create_edge, create_vertex, drop_vertices};
-    #[cfg(feature = "async-std-runtime")]
-    use async_std::prelude::*;
-
-    #[cfg(feature = "tokio-runtime")]
     use tokio_stream::StreamExt;
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_client_connection_ok() {
         connect().await;
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_ok_credentials() {
         let client = GremlinClient::connect(
             ConnectionOptions::builder()
@@ -41,8 +35,7 @@ mod aio {
         assert!(result.is_ok(), "{:?}", result);
     }
 
-    #[cfg(feature = "async-std-runtime")]
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    #[tokio::test]
     async fn test_empty_query() {
         let graph = connect().await;
 
@@ -57,8 +50,7 @@ mod aio {
         )
     }
 
-    #[cfg(feature = "async-std-runtime")]
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    #[tokio::test]
     async fn test_session_empty_query() {
         let mut graph = connect().await;
         let mut sessioned_graph = graph
@@ -82,8 +74,7 @@ mod aio {
             .expect("It should close the session.");
     }
 
-    #[cfg(feature = "async-std-runtime")]
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    #[tokio::test]
     async fn test_keep_alive_query() {
         let graph = connect().await;
 
@@ -97,7 +88,7 @@ mod aio {
                 .await
         );
 
-        async_std::task::sleep(std::time::Duration::from_millis(2500)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(2500)).await;
 
         assert_eq!(
             0,
@@ -110,8 +101,7 @@ mod aio {
         )
     }
 
-    #[cfg(feature = "async-std-runtime")]
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    #[tokio::test]
     async fn test_partial_content() {
         let graph = connect().await;
 
@@ -137,8 +127,7 @@ mod aio {
         );
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_wrong_query() {
         let error = connect()
             .await
@@ -155,8 +144,7 @@ mod aio {
         }
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_wrong_alias() {
         let error = connect()
             .await
@@ -174,9 +162,7 @@ mod aio {
         }
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
-
+    #[tokio::test]
     async fn test_vertex_query() {
         let graph = connect().await;
         let vertices = graph
@@ -194,8 +180,8 @@ mod aio {
 
         assert_eq!("person", vertices[0].label());
     }
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+
+    #[tokio::test]
     async fn test_edge_query() {
         let graph = connect().await;
         let edges = graph
@@ -211,8 +197,7 @@ mod aio {
         assert_eq!("knows", edges[0].label());
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_vertex_creation() {
         let graph = connect().await;
         let mark = create_vertex(&graph, "mark").await;
@@ -237,8 +222,7 @@ mod aio {
         );
     }
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn test_edge_creation() {
         let graph = connect().await;
         let mark = create_vertex(&graph, "mark").await;

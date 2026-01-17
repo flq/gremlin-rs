@@ -3,5 +3,4 @@ members = [
     "gremlin-client",
     "gremlin-tutorial",
     "gremlin-derive",
-    "gremlin-cli"
 ]

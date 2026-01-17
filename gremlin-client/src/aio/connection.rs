@@ -4,31 +4,12 @@ use crate::connection::ConnectionOptions;
 
 use crate::message::Response;
 
-#[cfg(feature = "async-std-runtime")]
-mod async_std_use {
-    pub use async_std::net::TcpStream;
-    pub use async_std::task;
-    pub use async_tls::client::TlsStream;
-}
-
-#[cfg(feature = "async-std-runtime")]
-use async_std_use::*;
-
-#[cfg(feature = "tokio-runtime")]
-mod tokio_use {
-    pub use tokio::net::TcpStream;
-    pub use tokio::task;
-    pub use tokio_native_tls::TlsStream;
-}
+use tokio::net::TcpStream;
+use tokio::task;
+use tokio_native_tls::TlsStream;
 
 use futures::TryFutureExt;
-#[cfg(feature = "tokio-runtime")]
-use tokio_use::*;
 
-#[cfg(feature = "async-std-runtime")]
-use async_tungstenite::async_std::connect_async_with_tls_connector_and_config;
-
-#[cfg(feature = "tokio-runtime")]
 use async_tungstenite::tokio::{connect_async_with_tls_connector_and_config, TokioAdapter};
 
 use async_tungstenite::tungstenite::protocol::{Message, WebSocketConfig};
@@ -46,10 +27,6 @@ use std::sync::Arc;
 use url;
 use uuid::Uuid;
 
-#[cfg(feature = "async-std-runtime")]
-type WSStream = WebSocketStream<stream::Stream<TcpStream, TlsStream<TcpStream>>>;
-
-#[cfg(feature = "tokio-runtime")]
 type WSStream =
     WebSocketStream<stream::Stream<TokioAdapter<TcpStream>, TokioAdapter<TlsStream<TcpStream>>>>;
 
@@ -72,53 +49,7 @@ impl std::fmt::Debug for Conn {
     }
 }
 
-#[cfg(feature = "async-std-runtime")]
 mod tls {
-
-    use std::time::SystemTime;
-
-    use crate::connection::ConnectionOptions;
-    use rustls::{Certificate, ServerName};
-    pub struct NoCertificateVerification {}
-
-    impl rustls::client::ServerCertVerifier for NoCertificateVerification {
-        fn verify_server_cert(
-            &self,
-            _end_entity: &Certificate,
-            _intermediates: &[Certificate],
-            _server_name: &ServerName,
-            _scts: &mut dyn Iterator<Item = &[u8]>,
-            _ocsp_response: &[u8],
-            _now: SystemTime,
-        ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-            Ok(rustls::client::ServerCertVerified::assertion())
-        }
-    }
-
-    pub fn connector(opts: &ConnectionOptions) -> Option<async_tls::TlsConnector> {
-        use rustls::ClientConfig;
-        use std::sync::Arc;
-        if opts
-            .tls_options
-            .as_ref()
-            .map(|tls| tls.accept_invalid_certs)
-            .unwrap_or(false)
-        {
-            let config = ClientConfig::builder()
-                .with_safe_defaults()
-                .with_custom_certificate_verifier(Arc::new(NoCertificateVerification {}))
-                .with_no_client_auth();
-
-            Some(async_tls::TlsConnector::from(Arc::new(config)))
-        } else {
-            Some(async_tls::TlsConnector::new())
-        }
-    }
-}
-
-#[cfg(feature = "tokio-runtime")]
-mod tls {
-
     use crate::connection::ConnectionOptions;
     use tokio_native_tls::TlsConnector;
 
@@ -128,6 +59,7 @@ mod tls {
             .and_then(|tls| tls.tls_connector().map(TlsConnector::from).ok())
     }
 }
+
 impl Conn {
     pub async fn connect<T>(options: T) -> GremlinResult<Conn>
     where
@@ -138,26 +70,13 @@ impl Conn {
 
         let websocket_config = opts.websocket_options.as_ref().map(WebSocketConfig::from);
 
-        #[cfg(feature = "async-std-runtime")]
-        let (client, _) = {
-            connect_async_with_tls_connector_and_config(
-                url,
-                tls::connector(&opts),
-                websocket_config,
-            )
-            .map_err(|e| Arc::new(e))
-            .await?
-        };
-        #[cfg(feature = "tokio-runtime")]
-        let (client, _) = {
-            connect_async_with_tls_connector_and_config(
-                url,
-                tls::connector(&opts),
-                websocket_config,
-            )
-            .map_err(|e| Arc::new(e))
-            .await?
-        };
+        let (client, _) = connect_async_with_tls_connector_and_config(
+            url,
+            tls::connector(&opts),
+            websocket_config,
+        )
+        .map_err(|e| Arc::new(e))
+        .await?;
 
         let (sink, stream) = client.split();
         let (sender, receiver) = channel(20);
@@ -322,8 +241,7 @@ fn receiver_loop(
 mod tests {
     use super::*;
 
-    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[tokio::test]
     async fn it_should_connect() {
         Conn::connect(("localhost", 8182)).await.unwrap();
     }
